@@ -179,6 +179,7 @@
   .caso-card .desc{color:var(--texto-suave);margin-top:14px;max-width:76ch;}
 
   .recursos-row{display:flex;gap:12px;flex-wrap:wrap;flex-shrink:0;}
+  @media (max-width:600px){ .recursos-row{flex-shrink:1;max-width:100%;gap:8px;} .res-link{padding:9px 14px;} }
   .res-link{
     text-decoration:none;font-weight:700;font-size:0.85rem;
     padding:10px 18px;border-radius:999px;border:1.5px solid var(--violeta);
@@ -551,13 +552,18 @@
         <div class="caso-top">
           <h3>Operación Segura de Máquinas y Procedimientos en Supermercados</h3>
           <div class="recursos-row">
-            <button class="res-link" data-target="p6-scorm">Ver interactivo</button>
+            <button class="res-link" data-target="p6-scorm">Ver lección</button>
+            <button class="res-link" data-target="p6-lab">Ver actividad práctica</button>
           </div>
         </div>
         <p class="desc">Curso de cuatro módulos sobre operación segura en supermercados: seguridad general en la operación, carnicería y fiambrería, panadería y pastelería — con foco en riesgos mecánicos, uso correcto de EPP y procedimientos de limpieza y sanitización de equipos.</p>
         <div class="res-panel" id="p6-scorm">
-          <iframe data-src="scorm/supermercado/index.html" title="Interactivo: Operación Segura en Supermercados"></iframe>
-          <p class="res-note">Se muestra fuera de un LMS: se puede ver e interactuar con el contenido, pero no guarda calificación ni progreso. <a href="scorm/supermercado/index.html" target="_blank" rel="noopener">Abrir en pantalla completa</a></p>
+          <iframe data-src="muestras/supermercado/leccion/index.html" title="Lección: Equipos y maquinaria de carnicería y fiambrería (sierra, moledora y cortadora)"></iframe>
+          <p class="res-note">Se muestra fuera de un LMS: se puede ver e interactuar con el contenido, pero no guarda calificación ni progreso. <a href="muestras/supermercado/leccion/index.html" target="_blank" rel="noopener">Abrir en pantalla completa</a></p>
+        </div>
+        <div class="res-panel" id="p6-lab">
+          <iframe data-src="muestras/supermercado/laboratorio/index.html" title="Actividad práctica: ¿Acto inseguro o condición insegura?"></iframe>
+          <p class="res-note">Se muestra fuera de un LMS: se puede ver e interactuar con el contenido, pero no guarda calificación ni progreso.  <a href="muestras/supermercado/laboratorio/index.html" target="_blank" rel="noopener">Abrir en pantalla completa</a></p>
         </div>
       </article>
 
@@ -601,10 +607,20 @@
         <div class="caso-top">
           <h3>Operación Segura de Grúa Horquilla y Prevención de Riesgos</h3>
           <div class="recursos-row">
+            <button class="res-link" data-target="p9-scorm">Ver lección</button>
+            <button class="res-link" data-target="p9-lab">Ver desafío TLS</button>
             <button class="res-link" data-target="p9-video">Ver video</button>
           </div>
         </div>
         <p class="desc">A lo largo de esta experiencia se aprende a observar, interpretar y tomar decisiones seguras antes, durante y al finalizar una operación, con la metodología TLS® — Tremen Learning System. El recorrido combina lecciones interactivas, escenarios y microdecisiones, laboratorios TLS, desafíos y misiones aplicadas, con retroalimentación que explica no solo qué decisión tomar, sino también por qué.</p>
+        <div class="res-panel" id="p9-scorm">
+          <iframe data-src="muestras/grua-horquilla/leccion/index.html" title="Lección 5: Antes del accidente aparecen señales"></iframe>
+          <p class="res-note">Se muestra fuera de un LMS: se puede ver e interactuar con el contenido, pero no guarda calificación ni progreso.  <a href="muestras/grua-horquilla/leccion/index.html" target="_blank" rel="noopener">Abrir en pantalla completa</a></p>
+        </div>
+        <div class="res-panel" id="p9-lab">
+          <iframe data-src="muestras/grua-horquilla/laboratorio/index.html" title="Desafío TLS: La decisión antes del movimiento"></iframe>
+          <p class="res-note">Se muestra fuera de un LMS: se puede ver e interactuar con el contenido, pero no guarda calificación ni progreso.  <a href="muestras/grua-horquilla/laboratorio/index.html" target="_blank" rel="noopener">Abrir en pantalla completa</a></p>
+        </div>
         <div class="res-panel" id="p9-video">
           <video controls preload="none"><source src="videos/grua-horquilla.mp4" type="video/mp4"></video>
         </div>

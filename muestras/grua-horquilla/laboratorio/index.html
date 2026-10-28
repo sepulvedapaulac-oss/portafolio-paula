@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desafío TLS — La decisión antes del movimiento</title>
+<style>
+  :root{
+    --azul: #1E4E79;
+    --azul-oscuro: #123650;
+    --amarillo: #F4B400;
+    --gris-claro: #F5F5F5;
+    --negro: #222222;
+    --verde: #2E7D32;
+    --naranjo: #C15A00;
+    --rojo: #C62828;
+    --blanco: #FFFFFF;
+    --borde: #D8DEE4;
+    --radio: 10px;
+    --sombra: 0 2px 10px rgba(18,54,80,0.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    background: var(--gris-claro);
+    color: var(--negro);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  #app{max-width:760px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--gris-claro);}
+
+  /* ===== HEADER ===== */
+  header{
+    background: var(--azul-oscuro);
+    color:var(--blanco);
+    padding:16px 20px 14px;
+    position:sticky;top:0;z-index:20;
+    box-shadow: var(--sombra);
+  }
+  .header-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+  .eyebrow{
+    text-transform:uppercase;letter-spacing:1px;font-size:.72rem;font-weight:700;
+    color:var(--amarillo);margin:0 0 4px;
+  }
+  h1{font-size:1.2rem;margin:0 0 2px;font-weight:800;}
+  .curso-info{font-size:.82rem;color:#CFE0EC;margin:0;}
+  #btnReset{
+    background:transparent;border:1.5px solid #6C90A9;color:#E4EEF4;
+    border-radius:6px;padding:7px 12px;font-size:.78rem;cursor:pointer;
+    white-space:nowrap;height:fit-content;
+  }
+  #btnReset:hover{background:rgba(255,255,255,0.08);}
+  .progreso-wrap{margin-top:12px;}
+  .progreso-track{
+    background:rgba(255,255,255,0.18);border-radius:20px;height:8px;overflow:hidden;
+  }
+  .progreso-fill{
+    background:var(--amarillo);height:100%;border-radius:20px;width:0%;
+    transition:width .4s ease;
+  }
+  .progreso-label{font-size:.72rem;color:#CFE0EC;margin-top:5px;display:flex;justify-content:space-between;}
+
+  /* ===== MARGEN OPERACIONAL BADGE ===== */
+  #margenBar{
+    background:var(--blanco);border-bottom:1px solid var(--borde);
+    padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:10px;
+    position:sticky;top:97px;z-index:19;
+  }
+  .margen-label{font-size:.78rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#556270;}
+  .margen-badge{
+    display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:.9rem;
+    padding:6px 14px;border-radius:999px;border:2px solid transparent;
+    transition:background-color .3s ease, border-color .3s ease, color .3s ease;
+  }
+  .margen-favorable{background:#E7F3E8;color:var(--verde);border-color:var(--verde);}
+  .margen-reducido{background:#FCEEDC;color:var(--naranjo);border-color:var(--naranjo);}
+  .margen-critico{background:#FBE4E4;color:var(--rojo);border-color:var(--rojo);}
+
+  /* ===== MAIN ===== */
+  main{flex:1;padding:20px;padding-bottom:60px;}
+  .card{
+    background:var(--blanco);border:1px solid var(--borde);border-radius:var(--radio);
+    padding:22px;margin-bottom:16px;box-shadow:var(--sombra);
+  }
+  .ronda-tag{
+    display:inline-block;background:var(--azul);color:var(--blanco);font-size:.72rem;
+    font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:4px 10px;
+    border-radius:5px;margin-bottom:12px;
+  }
+  h2{font-size:1.15rem;margin:0 0 10px;color:var(--azul-oscuro);}
+  p{margin:0 0 12px;}
+  .escena{background:var(--gris-claro);border-left:4px solid var(--azul);border-radius:6px;padding:14px 16px;margin-bottom:14px;}
+  .escena ul{margin:0;padding-left:20px;}
+  .escena li{margin-bottom:6px;}
+  .escena li.previa{color:#5B6A75;}
+  .escena li.nueva{color:var(--negro);font-weight:700;}
+  .escena li.nueva::marker{color:var(--naranjo);}
+  .pregunta{
+    font-style:italic;font-weight:700;color:var(--azul-oscuro);margin:14px 0 16px;font-size:1rem;
+  }
+
+  .opciones{display:flex;flex-direction:column;gap:10px;}
+  .opcion-btn{
+    display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+    background:var(--blanco);border:2px solid var(--azul);color:var(--azul-oscuro);
+    border-radius:8px;padding:13px 16px;font-size:.95rem;font-weight:700;cursor:pointer;
+    transition:background-color .15s ease, color .15s ease;
+  }
+  .opcion-btn:hover{background:#EAF1F7;}
+  .opcion-btn:focus-visible{outline:3px solid var(--amarillo);outline-offset:2px;}
+  .opcion-btn .icono{font-size:1.1rem;}
+  .opcion-btn[data-tipo="mantener"]{border-color:var(--azul);}
+  .opcion-btn[data-tipo="adaptar"]{border-color:var(--naranjo);color:var(--naranjo);}
+  .opcion-btn[data-tipo="detener"]{border-color:var(--rojo);color:var(--rojo);}
+  .opcion-btn[data-tipo="adaptar"]:hover{background:#FDF2E4;}
+  .opcion-btn[data-tipo="detener"]:hover{background:#FCE9E9;}
+
+  .feedback-box{
+    border-radius:8px;padding:16px;margin-top:6px;border:1px solid var(--borde);
+  }
+  .feedback-box .delta{
+    display:inline-block;font-weight:800;font-size:.8rem;padding:3px 9px;border-radius:6px;margin-bottom:8px;
+  }
+  .delta-pos{background:#E7F3E8;color:var(--verde);}
+  .delta-neg-low{background:#FCEEDC;color:var(--naranjo);}
+  .delta-neg-high{background:#FBE4E4;color:var(--rojo);}
+  .btn-continuar{
+    margin-top:16px;background:var(--azul);color:var(--blanco);border:none;
+    padding:12px 22px;border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer;
+  }
+  .btn-continuar:hover{background:var(--azul-oscuro);}
+  .btn-continuar:focus-visible{outline:3px solid var(--amarillo);outline-offset:2px;}
+
+  /* ===== INTRO / REFLEXION / CIERRE elementos ===== */
+  .lista-check{list-style:none;padding:0;margin:0 0 14px;}
+  .lista-check li{padding:8px 0 8px 28px;position:relative;border-bottom:1px solid var(--borde);}
+  .lista-check li:last-child{border-bottom:none;}
+  .lista-check li::before{content:"✓";position:absolute;left:0;top:8px;color:var(--verde);font-weight:800;}
+
+  .reflexion-opcion{
+    display:flex;align-items:flex-start;gap:10px;border:2px solid var(--borde);border-radius:8px;
+    padding:12px 14px;margin-bottom:9px;cursor:pointer;
+  }
+  .reflexion-opcion input{margin-top:3px;width:18px;height:18px;flex-shrink:0;}
+  .reflexion-opcion label{cursor:pointer;font-weight:600;font-size:.94rem;}
+  .reflexion-opcion.correcta-marcada{border-color:var(--verde);background:#F0F8F1;}
+  .reflexion-opcion.correcta-no-marcada{border-color:var(--verde);background:#FBFBEF;}
+  .reflexion-opcion.incorrecta-marcada{border-color:var(--rojo);background:#FCEEEE;}
+  .marca-resultado{font-size:.78rem;font-weight:800;margin-left:auto;white-space:nowrap;padding-left:8px;}
+  .marca-correcta{color:var(--verde);}
+  .marca-incorrecta{color:var(--rojo);}
+
+  .cadena{display:flex;flex-direction:column;gap:0;}
+  .cadena-paso{
+    background:var(--gris-claro);border:1px solid var(--borde);border-left:5px solid var(--azul);
+    border-radius:6px;padding:12px 15px;margin-bottom:4px;
+  }
+  .cadena-paso .paso-nombre{font-weight:800;color:var(--azul-oscuro);font-size:.82rem;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:3px;}
+  .cadena-flecha{text-align:center;color:var(--azul);font-weight:800;font-size:1.1rem;margin:2px 0;}
+
+  .cierre-msg{
+    background:var(--azul-oscuro);color:var(--blanco);border-radius:10px;padding:20px 22px;margin-top:18px;
+    font-size:1.02rem;line-height:1.6;
+  }
+  .cierre-msg strong{color:var(--amarillo);}
+
+  .resultado-final-badge{text-align:center;padding:18px;margin-bottom:16px;border-radius:10px;font-weight:800;font-size:1.05rem;}
+  .resumen-tabla{width:100%;border-collapse:collapse;margin:10px 0;font-size:.9rem;}
+  .resumen-tabla th,.resumen-tabla td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--borde);}
+  .resumen-tabla th{color:#556270;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.4px;}
+
+  .banner-resumido{
+    background:#EAF1F7;border:1px solid var(--azul);border-radius:8px;padding:12px 16px;margin-bottom:16px;
+    display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  }
+  .banner-resumido button{
+    border:none;border-radius:6px;padding:8px 14px;font-weight:700;font-size:.82rem;cursor:pointer;
+  }
+  .btn-continuar-sesion{background:var(--azul);color:var(--blanco);}
+  .btn-reiniciar-sesion{background:transparent;color:var(--azul);border:1.5px solid var(--azul) !important;}
+
+  .btn-reiniciar-final{
+    display:inline-block;margin-top:18px;background:var(--amarillo);color:var(--azul-oscuro);
+    border:none;padding:13px 24px;border-radius:8px;font-weight:800;font-size:.95rem;cursor:pointer;
+  }
+  .btn-reiniciar-final:hover{background:#E0A600;}
+
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0,0,0,0);white-space:nowrap;border:0;
+  }
+
+  footer{text-align:center;font-size:.72rem;color:#8393A0;padding:14px 20px 24px;}
+
+  @media (max-width:480px){
+    header{padding:13px 14px 12px;}
+    h1{font-size:1.05rem;}
+    main{padding:14px;}
+    .card{padding:16px;}
+    #margenBar{top:92px;padding:8px 14px;}
+    .margen-badge{font-size:.82rem;padding:5px 11px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;animation:none !important;}
+  }
+
+  @media (prefers-contrast: more){
+    .opcion-btn{border-width:3px;}
+    .card{border-width:2px;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="header-top">
+      <div>
+        <p class="eyebrow">Desafío TLS · Tremen Learning System</p>
+        <h1>La decisión antes del movimiento</h1>
+        <p class="curso-info">Operación Segura de Grúa Horquilla — Módulo 1</p>
+      </div>
+      <button id="btnReset" type="button" aria-label="Reiniciar desafío">↺ Reiniciar</button>
+    </div>
+    <div class="progreso-wrap">
+      <div class="progreso-track"><div class="progreso-fill" id="progresoFill"></div></div>
+      <div class="progreso-label">
+        <span id="progresoTexto">Inicio</span>
+        <span id="progresoNumero"></span>
+      </div>
+    </div>
+  </header>
+
+  <div id="margenBar" aria-hidden="false">
+    <span class="margen-label">Margen operacional:</span>
+    <span class="margen-badge margen-favorable" id="margenBadge" role="status" aria-live="polite">🟢 FAVORABLE</span>
+  </div>
+
+  <main id="content"></main>
+
+  <footer>Tremen Partner · Metodología TLS — Tremen Learning System</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "tls_desafio_decision_antes_movimiento";
+
+  var ROUNDS = [
+    {
+      newBullets: ["Carga centrada y baja.", "Superficie nivelada.", "Ruta despejada."],
+      question: "¿Qué condición observas?",
+      feedback: {
+        mantener: {
+          delta: 0,
+          text: "Las tres condiciones están dentro de un rango seguro: carga baja y centrada, superficie nivelada, ruta despejada. Mantener el proceso es coherente con lo que observas en este momento."
+        },
+        adaptar: {
+          delta: -5,
+          text: "No hay ninguna condición fuera de rango que exija ajustar la maniobra todavía. Adaptar sin un motivo real puede generar movimientos innecesarios y restar atención a lo que sí importa."
+        },
+        detener: {
+          delta: -10,
+          text: "Detenerte aquí no está justificado: no hay ninguna señal de riesgo presente. Una parada sin causa real desgasta la atención para el momento en que sí sea necesaria."
+        }
+      }
+    },
+    {
+      newBullets: ["La carga mantiene el mismo peso, pero ahora está más alejada del respaldo del mástil."],
+      question: "¿Qué cambió realmente?",
+      feedback: {
+        mantener: {
+          delta: -20,
+          text: "El peso no cambió, pero la distancia de la carga respecto al respaldo sí. Eso desplaza el centro de carga y reduce la capacidad efectiva del equipo, aunque el peso indicado se vea igual. Mantener la decisión sin considerar este cambio expone la operación a un riesgo que no estás viendo."
+        },
+        adaptar: {
+          delta: 0,
+          text: "Aunque el peso es el mismo, la carga más alejada del respaldo cambia el momento de carga sobre el mástil. Ajustar la maniobra —velocidad, altura o verificación de la capacidad efectiva— responde a lo que realmente cambió."
+        },
+        detener: {
+          delta: -5,
+          text: "Detenerte por completo es una respuesta posible, pero para este cambio puntual probablemente sea más de lo necesario. Lo importante es que reconozcas que algo cambió, aunque no haya sido el peso."
+        }
+      }
+    },
+    {
+      newBullets: ["Debe realizarse un giro en el trayecto."],
+      question: "¿Qué exige este giro, considerando cómo va la carga?",
+      feedback: {
+        mantener: {
+          delta: -20,
+          text: "Ya llevas una carga con el centro de carga desplazado y ahora se suma un giro. Mantener el mismo ritmo sin ajustar amplifica el efecto de ambas condiciones juntas."
+        },
+        adaptar: {
+          delta: 0,
+          text: "Reducir la velocidad y ampliar el radio de giro compensa el desplazamiento de carga que ya llevabas. Ajustar aquí evita que dos condiciones se combinen sin control."
+        },
+        detener: {
+          delta: -5,
+          text: "Detenerte para reevaluar el giro es prudente, aunque en este punto un ajuste de maniobra —sin llegar a una parada completa— probablemente sea suficiente."
+        }
+      }
+    },
+    {
+      newBullets: ["Aparece una pendiente en la ruta."],
+      question: "¿Qué combinación de factores enfrentas ahora?",
+      feedback: {
+        mantener: {
+          delta: -25,
+          text: "La carga sigue desplazada, ya hiciste un giro y ahora se suma una pendiente. Mantener la misma maniobra frente a esta acumulación de condiciones incrementa fuertemente el riesgo de pérdida de estabilidad."
+        },
+        adaptar: {
+          delta: 0,
+          text: "Ajustar la orientación de la carga y la velocidad al enfrentar la pendiente responde a la acumulación de factores que ya llevas encima. Es la decisión que corresponde a este punto de la maniobra."
+        },
+        detener: {
+          delta: -5,
+          text: "Detener para reevaluar en una pendiente con carga desplazada no es una mala decisión, aunque con un ajuste adecuado la operación podría continuar de forma controlada."
+        }
+      }
+    },
+    {
+      newBullets: ["Un peatón se aproxima a la intersección de la ruta."],
+      question: "¿Qué decides frente a esta nueva variable?",
+      feedback: {
+        mantener: {
+          delta: -35,
+          text: "Un peatón acercándose a la intersección de tu ruta involucra a una persona, no solo a la carga o al equipo. Mantener el movimiento en este punto es la decisión de mayor riesgo de todo el desafío."
+        },
+        adaptar: {
+          delta: -15,
+          text: "Reducir la velocidad o usar la bocina puede ayudar, pero cuando existe riesgo de contacto con una persona, un ajuste parcial no elimina el peligro. Esta situación requiere una respuesta más firme."
+        },
+        detener: {
+          delta: 5,
+          text: "Detener la maniobra y reevaluar es la única decisión que elimina por completo el riesgo hacia el peatón. Frente a la presencia de una persona en la ruta, esa siempre es la prioridad."
+        }
+      }
+    }
+  ];
+
+  var REFLEXION_OPCIONES = [
+    { id: "peso",      texto: "El peso de la carga aumentó.", correcta: false },
+    { id: "distancia",  texto: "La carga quedó más alejada del respaldo del mástil.", correcta: true },
+    { id: "giro",       texto: "Fue necesario realizar un giro.", correcta: true },
+    { id: "pendiente",  texto: "Apareció una pendiente en la ruta.", correcta: true },
+    { id: "repeticion", texto: "Se mantuvo la misma decisión ante cada cambio, sin ajustar la maniobra.", correcta: true },
+    { id: "peaton",     texto: "Un peatón se aproximó a la ruta.", correcta: true },
+    { id: "superficie", texto: "La superficie perdió nivelación.", correcta: false },
+    { id: "operador",   texto: "El operador no estaba capacitado.", correcta: false }
+  ];
+
+  var TOTAL_PASOS = 7; // 5 rondas + reflexión + resultado final
+
+  var state = {
+    screen: "intro",      // intro | ronda | reflexion | final
+    rondaActual: 0,       // 0-4 mientras se juega
+    score: 100,
+    elecciones: [],       // {tipo, delta}
+    reflexionSeleccion: [],
+    reflexionRespondida: false
+  };
+
+  var contentEl = document.getElementById("content");
+  var progresoFill = document.getElementById("progresoFill");
+  var progresoTexto = document.getElementById("progresoTexto");
+  var progresoNumero = document.getElementById("progresoNumero");
+  var margenBadge = document.getElementById("margenBadge");
+  var btnReset = document.getElementById("btnReset");
+
+  function guardar(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }catch(e){ /* almacenamiento no disponible: continuar sin guardar */ }
+  }
+
+  function cargar(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return null;
+      var datos = JSON.parse(raw);
+      if(datos && typeof datos === "object") return datos;
+    }catch(e){ /* ignorar */ }
+    return null;
+  }
+
+  function limpiarStorage(){
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  }
+
+  function margenInfo(score){
+    if(score >= 70) return { clase: "margen-favorable", texto: "🟢 FAVORABLE" };
+    if(score >= 40) return { clase: "margen-reducido", texto: "🟡 REDUCIDO" };
+    return { clase: "margen-critico", texto: "🔴 CRÍTICO" };
+  }
+
+  function actualizarMargen(){
+    var info = margenInfo(state.score);
+    margenBadge.className = "margen-badge " + info.clase;
+    margenBadge.textContent = info.texto;
+  }
+
+  function actualizarProgreso(){
+    var pasoActual = 0;
+    var etiqueta = "Inicio";
+    if(state.screen === "intro"){ pasoActual = 0; etiqueta = "Inicio del desafío"; }
+    else if(state.screen === "ronda"){ pasoActual = state.rondaActual + 1; etiqueta = "Ronda " + (state.rondaActual + 1) + " de 5"; }
+    else if(state.screen === "reflexion"){ pasoActual = 6; etiqueta = "Reflexión final"; }
+    else if(state.screen === "final"){ pasoActual = 7; etiqueta = "Resultado del desafío"; }
+    var pct = Math.round((pasoActual / TOTAL_PASOS) * 100);
+    progresoFill.style.width = pct + "%";
+    progresoTexto.textContent = etiqueta;
+    progresoNumero.textContent = pasoActual + " / " + TOTAL_PASOS;
+  }
+
+  function escapeHtml(str){
+    var d = document.createElement("div");
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function deltaClase(delta){
+    if(delta >= 0) return "delta-pos";
+    if(delta >= -10) return "delta-neg-low";
+    return "delta-neg-high";
+  }
+
+  function deltaTexto(delta){
+    if(delta > 0) return "MARGEN +" + delta + "%";
+    if(delta === 0) return "MARGEN SIN CAMBIO";
+    return "MARGEN " + delta + "%";
+  }
+
+  /* ===================== PANTALLAS ===================== */
+
+  function renderIntro(){
+    var resumen = "";
+    var saved = cargar();
+    if(saved && saved.screen !== "intro" && !(saved.screen === "final")){
+      resumen = '<div class="banner-resumido">' +
+        '<span>Tienes progreso guardado en la ronda ' + Math.min((saved.rondaActual||0)+1,5) + ' de 5.</span>' +
+        '<span>' +
+          '<button class="btn-continuar-sesion" id="btnContinuarSesion" type="button">Continuar</button> ' +
+          '<button class="btn-reiniciar-sesion" id="btnReiniciarSesion" type="button">Empezar de nuevo</button>' +
+        '</span></div>';
+    }
+
+    contentEl.innerHTML =
+      resumen +
+      '<div class="card">' +
+        '<span class="ronda-tag">Escenario</span>' +
+        '<h2>Traslado de recepción a almacenamiento</h2>' +
+        '<p>Vas a operar una grúa horquilla que debe trasladar una carga desde el área de recepción hasta el sector de almacenamiento.</p>' +
+        '<p>La información sobre el trayecto no aparece toda de una vez. Ronda a ronda irás recibiendo nuevos datos y, con cada uno, deberás decidir cómo continuar.</p>' +
+        '<div class="escena">' +
+          '<ul class="lista-check">' +
+            '<li>En cada ronda podrás elegir entre <strong>Mantener decisión</strong>, <strong>Adaptar maniobra</strong> o <strong>Detener / reevaluar</strong>.</li>' +
+            '<li>El indicador <strong>Margen operacional</strong>, visible arriba, refleja el efecto acumulado de tus decisiones.</li>' +
+            '<li>No hay una única respuesta que se te revele de inmediato: la retroalimentación te explica la consecuencia de cada elección.</li>' +
+          '</ul>' +
+        '</div>' +
+        '<button class="btn-continuar" id="btnIniciar" type="button">Iniciar el traslado</button>' +
+      '</div>';
+
+    var btnIniciar = document.getElementById("btnIniciar");
+    if(btnIniciar) btnIniciar.addEventListener("click", function(){
+      state.screen = "ronda";
+      state.rondaActual = 0;
+      guardar();
+      render();
+    });
+
+    var btnContinuarSesion = document.getElementById("btnContinuarSesion");
+    if(btnContinuarSesion) btnContinuarSesion.addEventListener("click", function(){
+      state = saved;
+      render();
+    });
+
+    var btnReiniciarSesion = document.getElementById("btnReiniciarSesion");
+    if(btnReiniciarSesion) btnReiniciarSesion.addEventListener("click", function(){
+      limpiarStorage();
+      reiniciarEstado();
+      render();
+    });
+  }
+
+  function bulletsAcumulados(hastaIndice){
+    var items = [];
+    for(var i = 0; i <= hastaIndice; i++){
+      var esNueva = (i === hastaIndice);
+      ROUNDS[i].newBullets.forEach(function(txt){
+        items.push({ texto: txt, nueva: esNueva });
+      });
+    }
+    return items;
+  }
+
+  function renderRonda(mostrandoFeedback, tipoElegido){
+    var idx = state.rondaActual;
+    var ronda = ROUNDS[idx];
+    var bullets = bulletsAcumulados(idx);
+
+    var bulletsHtml = bullets.map(function(b){
+      return '<li class="' + (b.nueva ? "nueva" : "previa") + '">' + escapeHtml(b.texto) + '</li>';
+    }).join("");
+
+    var html =
+      '<div class="card">' +
+        '<span class="ronda-tag">Ronda ' + (idx + 1) + ' de 5</span>' +
+        '<div class="escena"><ul>' + bulletsHtml + '</ul></div>' +
+        '<p class="pregunta">' + escapeHtml(ronda.question) + '</p>';
+
+    if(!mostrandoFeedback){
+      html +=
+        '<div class="opciones" role="group" aria-label="Elige una decisión para esta ronda">' +
+          '<button class="opcion-btn" data-tipo="mantener" type="button"><span class="icono">➡️</span> Mantener decisión</button>' +
+          '<button class="opcion-btn" data-tipo="adaptar" type="button"><span class="icono">🛠️</span> Adaptar maniobra</button>' +
+          '<button class="opcion-btn" data-tipo="detener" type="button"><span class="icono">✋</span> Detener / reevaluar</button>' +
+        '</div>';
+    } else {
+      var fb = ronda.feedback[tipoElegido];
+      html +=
+        '<div class="feedback-box" role="status">' +
+          '<span class="delta ' + deltaClase(fb.delta) + '">' + deltaTexto(fb.delta) + '</span>' +
+          '<p>' + escapeHtml(fb.text) + '</p>' +
+        '</div>' +
+        '<button class="btn-continuar" id="btnContinuarRonda" type="button">' +
+          (idx < ROUNDS.length - 1 ? "Continuar a la siguiente ronda" : "Ver reflexión final") +
+        '</button>';
+    }
+
+    html += '</div>';
+    contentEl.innerHTML = html;
+
+    if(!mostrandoFeedback){
+      var botones = contentEl.querySelectorAll(".opcion-btn");
+      botones.forEach(function(btn){
+        btn.addEventListener("click", function(){
+          var tipo = btn.getAttribute("data-tipo");
+          var fb = ronda.feedback[tipo];
+          state.score = Math.max(0, Math.min(100, state.score + fb.delta));
+          state.elecciones.push({ ronda: idx + 1, tipo: tipo, delta: fb.delta });
+          actualizarMargen();
+          guardar();
+          renderRonda(true, tipo);
+        });
+      });
+    } else {
+      var btnContinuarRonda = document.getElementById("btnContinuarRonda");
+      btnContinuarRonda.addEventListener("click", function(){
+        if(idx < ROUNDS.length - 1){
+          state.rondaActual = idx + 1;
+          state.screen = "ronda";
+        } else {
+          state.screen = "reflexion";
+        }
+        guardar();
+        render();
+      });
+    }
+
+    actualizarProgreso();
+  }
+
+  function renderReflexion(){
+    if(state.reflexionRespondida){
+      renderReflexionResultado();
+      return;
+    }
+
+    var opcionesHtml = REFLEXION_OPCIONES.map(function(op){
+      var marcado = state.reflexionSeleccion.indexOf(op.id) !== -1;
+      return (
+        '<div class="reflexion-opcion">' +
+          '<input type="checkbox" id="ref_' + op.id + '" value="' + op.id + '"' + (marcado ? " checked" : "") + '>' +
+          '<label for="ref_' + op.id + '">' + escapeHtml(op.texto) + '</label>' +
+        '</div>'
+      );
+    }).join("");
+
+    contentEl.innerHTML =
+      '<div class="card">' +
+        '<span class="ronda-tag">Reflexión final</span>' +
+        '<h2>¿Qué llevó la operación desde una condición inicialmente favorable hasta una condición crítica?</h2>' +
+        '<p>Selecciona todos los factores que consideres que influyeron. Puedes marcar más de una opción.</p>' +
+        opcionesHtml +
+        '<button class="btn-continuar" id="btnEnviarReflexion" type="button">Confirmar selección</button>' +
+      '</div>';
+
+    var btnEnviar = document.getElementById("btnEnviarReflexion");
+    btnEnviar.addEventListener("click", function(){
+      var marcadas = [];
+      REFLEXION_OPCIONES.forEach(function(op){
+        var el = document.getElementById("ref_" + op.id);
+        if(el && el.checked) marcadas.push(op.id);
+      });
+      state.reflexionSeleccion = marcadas;
+      state.reflexionRespondida = true;
+      guardar();
+      renderReflexionResultado();
+    });
+
+    actualizarProgreso();
+  }
+
+  function renderReflexionResultado(){
+    var seleccion = state.reflexionSeleccion;
+
+    var opcionesHtml = REFLEXION_OPCIONES.map(function(op){
+      var marcado = seleccion.indexOf(op.id) !== -1;
+      var claseExtra = "";
+      var marcaHtml = "";
+      if(op.correcta && marcado){
+        claseExtra = "correcta-marcada";
+        marcaHtml = '<span class="marca-resultado marca-correcta">✓ Factor real</span>';
+      } else if(op.correcta && !marcado){
+        claseExtra = "correcta-no-marcada";
+        marcaHtml = '<span class="marca-resultado marca-correcta">✓ También influyó</span>';
+      } else if(!op.correcta && marcado){
+        claseExtra = "incorrecta-marcada";
+        marcaHtml = '<span class="marca-resultado marca-incorrecta">✗ No ocurrió en el escenario</span>';
+      }
+      return (
+        '<div class="reflexion-opcion ' + claseExtra + '" style="cursor:default;">' +
+          '<span style="width:18px;flex-shrink:0;text-align:center;">' + (marcado ? "☑" : "☐") + '</span>' +
+          '<label style="cursor:default;">' + escapeHtml(op.texto) + '</label>' +
+          marcaHtml +
+        '</div>'
+      );
+    }).join("");
+
+    contentEl.innerHTML =
+      '<div class="card">' +
+        '<span class="ronda-tag">Reflexión final</span>' +
+        '<h2>Revisión de tu selección</h2>' +
+        opcionesHtml +
+        '<div class="feedback-box" style="margin-top:14px;">' +
+          '<p style="margin:0;"><strong>No fue una sola condición.</strong> Fue la acumulación y combinación de varios cambios —cada uno manejable por separado— lo que redujo el margen operacional a lo largo del trayecto.</p>' +
+        '</div>' +
+        '<button class="btn-continuar" id="btnVerResultado" type="button">Ver el resultado del desafío</button>' +
+      '</div>';
+
+    var btnVerResultado = document.getElementById("btnVerResultado");
+    btnVerResultado.addEventListener("click", function(){
+      state.screen = "final";
+      guardar();
+      render();
+    });
+
+    actualizarProgreso();
+  }
+
+  function renderFinal(){
+    var info = margenInfo(state.score);
+    var adaptaciones = state.elecciones.filter(function(e){ return e.tipo === "adaptar"; }).length;
+    var mantenciones = state.elecciones.filter(function(e){ return e.tipo === "mantener"; }).length;
+    var detenciones = state.elecciones.filter(function(e){ return e.tipo === "detener"; }).length;
+    var eleccionPeaton = state.elecciones[4]; // ronda 5
+    var manejoPeaton = eleccionPeaton && eleccionPeaton.tipo === "detener";
+
+    var decisionTexto;
+    if(mantenciones >= 3){
+      decisionTexto = "En la mayoría de los cambios elegiste mantener la misma decisión sin ajustar la maniobra. Esa repetición, más que un solo error puntual, fue lo que permitió que las condiciones se acumularan sin control.";
+    } else if(adaptaciones >= 3 && manejoPeaton){
+      decisionTexto = "Ajustaste la maniobra a medida que las condiciones cambiaban y detuviste la operación frente al peatón. Esa lectura constante del entorno es lo que mantiene el margen operacional bajo control.";
+    } else {
+      decisionTexto = "Combinaste distintos tipos de decisión a lo largo del trayecto: algunas mantuvieron el margen, otras lo redujeron. El resultado final refleja esa mezcla de respuestas frente a cada cambio.";
+    }
+
+    var resultadoTexto;
+    if(info.clase === "margen-favorable"){
+      resultadoTexto = "La operación terminó con el margen operacional en un nivel favorable: los ajustes realizados compensaron los cambios que fueron apareciendo en el trayecto.";
+    } else if(info.clase === "margen-reducido"){
+      resultadoTexto = "La operación terminó con el margen operacional reducido: algunos cambios se enfrentaron con ajustes y otros no, y esa combinación fue erosionando el control disponible.";
+    } else {
+      resultadoTexto = "La operación terminó con el margen operacional en un nivel crítico: la acumulación de cambios sin los ajustes necesarios llevó la maniobra a un punto de alto riesgo.";
+    }
+
+    var tablaFilas = state.elecciones.map(function(e){
+      var nombres = { mantener: "Mantener decisión", adaptar: "Adaptar maniobra", detener: "Detener / reevaluar" };
+      return '<tr><td>Ronda ' + e.ronda + '</td><td>' + nombres[e.tipo] + '</td><td>' + deltaTexto(e.delta) + '</td></tr>';
+    }).join("");
+
+    contentEl.innerHTML =
+      '<div class="card">' +
+        '<span class="ronda-tag">Resultado del desafío</span>' +
+        '<div class="resultado-final-badge ' + info.clase + '">' + info.texto + ' · Margen final ' + state.score + '%</div>' +
+        '<table class="resumen-tabla">' +
+          '<thead><tr><th>Momento</th><th>Decisión</th><th>Efecto</th></tr></thead>' +
+          '<tbody>' + tablaFilas + '</tbody>' +
+        '</table>' +
+
+        '<h2 style="margin-top:20px;">De la condición inicial al resultado</h2>' +
+        '<div class="cadena">' +
+          '<div class="cadena-paso"><span class="paso-nombre">Condición</span>La operación comenzó con carga centrada y baja, superficie nivelada y ruta despejada: un escenario favorable.</div>' +
+          '<div class="cadena-flecha">↓</div>' +
+          '<div class="cadena-paso"><span class="paso-nombre">Cambio</span>La carga se alejó del respaldo, apareció un giro y luego una pendiente: las condiciones fueron cambiando una a una, no todas juntas.</div>' +
+          '<div class="cadena-flecha">↓</div>' +
+          '<div class="cadena-paso"><span class="paso-nombre">Exposición</span>Cada cambio, por sí solo, era manejable. La aparición de un peatón, sumada a los cambios anteriores, elevó la exposición al riesgo de la maniobra.</div>' +
+          '<div class="cadena-flecha">↓</div>' +
+          '<div class="cadena-paso"><span class="paso-nombre">Decisión</span>' + decisionTexto + '</div>' +
+          '<div class="cadena-flecha">↓</div>' +
+          '<div class="cadena-paso"><span class="paso-nombre">Resultado</span>' + resultadoTexto + '</div>' +
+        '</div>' +
+
+        '<div class="cierre-msg">' +
+          '<p style="margin:0 0 8px;">Una maniobra puede comenzar bien y dejar de estar bajo control segundos después.</p>' +
+          '<p style="margin:0;"><strong>El operador seguro vuelve a decidir cada vez que cambian las condiciones.</strong></p>' +
+        '</div>' +
+
+        '<button class="btn-reiniciar-final" id="btnReiniciarFinal" type="button">↺ Repetir el desafío</button>' +
+      '</div>';
+
+    var btnReiniciarFinal = document.getElementById("btnReiniciarFinal");
+    btnReiniciarFinal.addEventListener("click", function(){
+      reiniciarEstado();
+      limpiarStorage();
+      render();
+    });
+
+    actualizarProgreso();
+  }
+
+  function reiniciarEstado(){
+    state = {
+      screen: "intro",
+      rondaActual: 0,
+      score: 100,
+      elecciones: [],
+      reflexionSeleccion: [],
+      reflexionRespondida: false
+    };
+    actualizarMargen();
+  }
+
+  function render(){
+    actualizarMargen();
+    if(state.screen === "intro") renderIntro();
+    else if(state.screen === "ronda") renderRonda(false);
+    else if(state.screen === "reflexion") renderReflexion();
+    else if(state.screen === "final") renderFinal();
+    actualizarProgreso();
+    contentEl.focus && window.scrollTo({ top: 0, behavior: "auto" });
+  }
+
+  btnReset.addEventListener("click", function(){
+    var confirmar = window.confirm("¿Reiniciar el desafío? Se perderá el progreso guardado.");
+    if(confirmar){
+      reiniciarEstado();
+      limpiarStorage();
+      render();
+    }
+  });
+
+  /* ===== Inicio ===== */
+  var guardado = cargar();
+  if(guardado && guardado.screen && guardado.screen !== "intro"){
+    // Se muestra la pantalla de inicio con opción de continuar/reiniciar
+    state = { screen: "intro", rondaActual: 0, score: 100, elecciones: [], reflexionSeleccion: [], reflexionRespondida: false };
+  }
+  render();
+
+})();
+</script>
+</body>
+</html>

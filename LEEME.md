@@ -5,7 +5,7 @@ Sitio estático (sin servidor ni base de datos) con los proyectos y una muestra 
 ## Contenido
 - `index.html`: el portafolio. Los cursos nuevos están al inicio de «Proyectos» y hay filtros por área.
 - `muestras/`: una lección y una actividad o laboratorio de cada curso, tal como salen del compilador (sin `imsmanifest.xml`):
-  Ley Karin · Legislación Laboral · Diversidad e Inclusión · PEMP · Administración de Bodega · IA en Remuneraciones · Herramientas Digitales PYMES · Comunicación Efectiva (lección 1 en Mindsmith) · Apilador Eléctrico (lección 1 en Mindsmith y actividad práctica) · Servicio al Cliente (laboratorio 3C).
+  Ley Karin · Legislación Laboral · Diversidad e Inclusión · PEMP · Administración de Bodega · IA en Remuneraciones · Herramientas Digitales PYMES · Comunicación Efectiva (lección 1 en Mindsmith) · Apilador Eléctrico (lección 1 en Mindsmith y actividad práctica) · Operación Segura en Supermercados (lección de carnicería y fiambrería en Mindsmith y actividad práctica) · Grúa Horquilla (lección 5 en Mindsmith y desafío TLS) · Servicio al Cliente (laboratorio 3C).
 
 ## Muestras que faltan
 Los proyectos que ya estaban en el portafolio apuntan a carpetas que no están en ningún repositorio. Si las tienes, cópialas así y aparecerán solas:
@@ -15,7 +15,6 @@ scorm/legislacion-sanitaria/index.html
 scorm/informes-tecnicos/index.html
 scorm/liderazgo-efectivo/index.html
 scorm/ley-manejo-datos/index.html
-scorm/supermercado/index.html
 scorm/servicio-cliente/index.html
 scorm/alfabetizacion-digital/index.html
 videos/autoliderazgo.mp4

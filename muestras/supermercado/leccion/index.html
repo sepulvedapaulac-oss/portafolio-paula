@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style type="text/css">
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      #content {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="content"></div>
+    <script>
+      /* API SCORM 1.2 mínima: permite ver el paquete fuera de un LMS (no guarda nota ni avance) */
+      (function(){var d={"cmi.core.lesson_status":"not attempted","cmi.core.entry":"ab-initio","cmi.core.student_name":"Visita","cmi.core.student_id":"visita","cmi.core.lesson_mode":"normal","cmi.core.credit":"no-credit","cmi.suspend_data":"","cmi.launch_data":"","cmi.core.lesson_location":""};
+      window.API={LMSInitialize:function(){return "true"},LMSFinish:function(){return "true"},LMSGetValue:function(k){return d[k]!==undefined?d[k]:""},LMSSetValue:function(k,v){d[k]=String(v);return "true"},LMSCommit:function(){return "true"},LMSGetLastError:function(){return "0"},LMSGetErrorString:function(){return ""},LMSGetDiagnostic:function(){return ""}};})();
+    </script>
+    <script
+      id="lessonscript"
+      data-package-hash="21d9fa02-14ed-462d-a896-b1f599a3e9a7"
+      data-scorm-version="1.2"
+      data-lesson-id="cmprmjs4e000004lg4ufagrh9"
+      data-course-id=""
+      data-content-type="lesson"
+      data-active-bypass-id="cmprmjsqx004v04lguffdlix1"
+      src="https://app.mindsmith.ai/scorm-interface.js"
+    ></script>
+  </body>
+</html>
