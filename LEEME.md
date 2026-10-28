@@ -8,12 +8,7 @@ Sitio estático (sin servidor ni base de datos) con los proyectos y una muestra 
   Ley Karin · Legislación Laboral · Diversidad e Inclusión · PEMP · Administración de Bodega · IA en Remuneraciones · Herramientas Digitales PYMES · Comunicación Efectiva (lección 1 en Mindsmith) · Apilador Eléctrico (lección 1 en Mindsmith y actividad práctica) · Operación Segura en Supermercados (lección de carnicería y fiambrería en Mindsmith y actividad práctica) · Grúa Horquilla (lección 5 en Mindsmith y desafío TLS) · Manejo de Extintores (lección 1 y video en Mindsmith) · Cumplimiento Regulatorio Sanitario (unidades 1 y 2 en Mindsmith) · Informes Técnicos (lecciones 1.1 y 1.2, publicadas en Mindsmith) · Servicio al Cliente (lección 1.1 en Mindsmith y actividad práctica 1.1).
 
 ## Muestras que faltan
-Los proyectos que ya estaban en el portafolio apuntan a carpetas que no están en ningún repositorio. Si las tienes, cópialas así y aparecerán solas:
-
-```
-videos/grua-horquilla.mp4
-```
-Mientras falten, el botón muestra «Esta muestra se comparte a pedido» en vez de un error.
+Ninguna: todas las tarjetas tienen su muestra. Si una carpeta de `muestras/` falta, el botón muestra «Esta muestra se comparte a pedido» en vez de un error.
 
 ## Publicación
 El sitio se publica con GitHub Pages desde la rama `main` de este repositorio:

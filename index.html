@@ -203,6 +203,8 @@
   .res-panel iframe{width:100%;height:500px;border:1px solid rgba(6,40,54,0.12);border-radius:12px;background:#fff;}
   .res-panel video{width:100%;border-radius:12px;}
   .video-16x9{position:relative;aspect-ratio:16/9;}
+  .video-externo{background:var(--violeta-claro);border-radius:12px;padding:22px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .video-externo p{color:var(--violeta-profundo);font-weight:600;}
   .res-panel .video-16x9 iframe{position:absolute;inset:0;width:100%;height:100%;}
   .res-note{font-size:0.8rem;color:var(--texto-suave);margin-top:8px;}
   .res-note a{color:var(--violeta-profundo);font-weight:700;}
@@ -621,7 +623,10 @@
           <p class="res-note">Se muestra fuera de un LMS: se puede ver e interactuar con el contenido, pero no guarda calificación ni progreso.  <a href="muestras/grua-horquilla/laboratorio/index.html" target="_blank" rel="noopener">Abrir en pantalla completa</a></p>
         </div>
         <div class="res-panel" id="p9-video">
-          <video controls preload="none"><source src="videos/grua-horquilla.mp4" type="video/mp4"></video>
+          <div class="video-externo">
+            <p>Video de presentación del curso, alojado en Microsoft Stream.</p>
+            <a class="btn btn-primary" href="https://tremenpartner-my.sharepoint.com/:v:/p/paula/IQBYww7TpE3JSLqyn7QqDaivAV8dCwOnYyuMP4809GnCBbc?e=YhAQdP" target="_blank" rel="noopener">Ver el video ▸</a>
+          </div>
         </div>
       </article>
 
