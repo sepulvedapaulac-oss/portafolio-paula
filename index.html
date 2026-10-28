@@ -191,6 +191,8 @@
   .res-panel.open{display:block;}
   .res-panel iframe{width:100%;height:500px;border:1px solid rgba(6,40,54,0.12);border-radius:12px;background:#fff;}
   .res-panel video{width:100%;border-radius:12px;}
+  .video-16x9{position:relative;aspect-ratio:16/9;}
+  .res-panel .video-16x9 iframe{position:absolute;inset:0;width:100%;height:100%;}
   .res-note{font-size:0.8rem;color:var(--texto-suave);margin-top:8px;}
   .res-note a{color:var(--violeta-profundo);font-weight:700;}
   .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
@@ -434,6 +436,7 @@
           <h3>Herramientas Digitales para PYMES</h3>
           <div class="recursos-row">
             <button class="res-link" data-target="pymes-1">Ver lección</button>
+            <button class="res-link" data-target="pymes-video">Ver video</button>
           </div>
         </div>
         <div class="tags"><span class="tag">30 horas</span><span class="tag">Microsoft 365</span><span class="tag">Lecciones con narración</span></div>
@@ -441,6 +444,10 @@
         <div class="res-panel" id="pymes-1">
           <iframe data-src="muestras/pymes-digital/leccion/index.html" title="Ver lección: Herramientas Digitales para PYMES"></iframe>
           <p class="res-note">Se muestra fuera de un LMS: se puede ver e interactuar con el contenido, pero no guarda calificación ni progreso. <a href="muestras/pymes-digital/leccion/index.html" target="_blank" rel="noopener">Abrir en pantalla completa</a></p>
+        </div>
+        <div class="res-panel" id="pymes-video">
+          <div class="video-16x9"><iframe data-src="https://player.vimeo.com/video/1233495731?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" title="Recorrido por Microsoft 365" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+          <p class="res-note">Video del curso: Recorrido por Microsoft 365.</p>
         </div>
       </article>
       <article class="caso-card fade-in" data-area="habilidades">
@@ -724,7 +731,8 @@
         const v = panel.querySelector('video source');
         const url = f ? f.dataset.src : (v ? v.getAttribute('src') : null);
         panel.classList.add('open'); btn.classList.add('active');
-        if (url) fetch(url, { method: 'HEAD' }).then(r => {
+        if (url && /^https?:/.test(url)) { if (f) f.src = url; }
+        else if (url) fetch(url, { method: 'HEAD' }).then(r => {
           if (!r.ok) throw 0;
           if (f && panel.classList.contains('open')) f.src = url;
         }).catch(() => {
