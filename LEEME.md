@@ -5,14 +5,12 @@ Sitio estático (sin servidor ni base de datos) con los proyectos y una muestra 
 ## Contenido
 - `index.html`: el portafolio. Los cursos nuevos están al inicio de «Proyectos» y hay filtros por área.
 - `muestras/`: una lección y una actividad o laboratorio de cada curso, tal como salen del compilador (sin `imsmanifest.xml`):
-  Ley Karin · Legislación Laboral · Diversidad e Inclusión · PEMP · Administración de Bodega · IA en Remuneraciones · Herramientas Digitales PYMES · Evaluación Diagnóstica de Excel · Comunicación Efectiva · Liderazgo Gentil · Servicio al Cliente (laboratorio 3C).
-- La evaluación de Excel está en modo demostración: los resultados de quien la pruebe quedan solo en su navegador y no llegan a la planilla real.
+  Ley Karin · Legislación Laboral · Diversidad e Inclusión · PEMP · Administración de Bodega · IA en Remuneraciones · Herramientas Digitales PYMES · Comunicación Efectiva (lección 1 en Mindsmith) · Apilador Eléctrico (lección 1 en Mindsmith y actividad práctica) · Servicio al Cliente (laboratorio 3C).
 
 ## Muestras que faltan
 Los proyectos que ya estaban en el portafolio apuntan a carpetas que no están en ningún repositorio. Si las tienes, cópialas así y aparecerán solas:
 
 ```
-scorm/apilador-electrico/index.html
 scorm/legislacion-sanitaria/index.html
 scorm/informes-tecnicos/index.html
 scorm/liderazgo-efectivo/index.html

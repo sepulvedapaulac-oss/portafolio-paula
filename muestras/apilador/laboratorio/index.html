@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TLS — Conoce tu Apilador</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#00a5ab;
+  --accent-dark:#008a8f;
+  --dark:#1a2332;
+  --dark2:#243044;
+  --mid:#3a4a5c;
+  --gray:#8899aa;
+  --light:#e8edf2;
+  --bg:#f4f7fa;
+  --white:#ffffff;
+  --green:#2ecc71;
+  --green-bg:#e8f8f0;
+  --yellow:#f39c12;
+  --yellow-bg:#fef9e7;
+  --red:#e74c3c;
+  --red-bg:#fdecea;
+  --radius:10px;
+  --shadow:0 2px 12px rgba(26,35,50,.08);
+}
+html{font-size:16px}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--dark);line-height:1.55;min-height:100vh;overflow-x:hidden}
+
+/* HEADER */
+.tls-header{background:var(--dark);color:var(--white);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;font-size:.8rem;position:sticky;top:0;z-index:100}
+.tls-header .brand{color:var(--accent);font-weight:700;letter-spacing:.5px}
+.tls-header .progress-info{display:flex;gap:16px;align-items:center;font-size:.75rem;color:var(--gray)}
+.tls-header .progress-info span{color:var(--accent);font-weight:600}
+
+/* PROGRESS BAR */
+.progress-bar-wrap{background:var(--dark2);height:4px;width:100%}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),#00d4db);transition:width .5s ease;width:0}
+
+/* MAIN CONTAINER */
+.container{max-width:960px;margin:0 auto;padding:20px 16px 40px}
+
+/* SCREEN */
+.screen{display:none;animation:fadeUp .4s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* WELCOME */
+.welcome-card{text-align:center;padding:48px 24px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);margin-top:24px}
+.welcome-card .icon-ring{width:80px;height:80px;border-radius:50%;border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;background:rgba(0,165,171,.08)}
+.welcome-card .icon-ring svg{width:40px;height:40px}
+.welcome-card h1{font-size:1.6rem;color:var(--dark);margin-bottom:4px;font-weight:800}
+.welcome-card .sub{color:var(--accent);font-size:1rem;font-weight:600;margin-bottom:16px;letter-spacing:1px}
+.welcome-card p{color:var(--mid);max-width:540px;margin:0 auto 28px;font-size:.92rem}
+.welcome-card .meta{display:flex;gap:20px;justify-content:center;margin-bottom:28px;font-size:.8rem;color:var(--gray)}
+.welcome-card .meta div{background:var(--bg);padding:6px 14px;border-radius:20px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border:none;border-radius:var(--radius);font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-primary{background:var(--accent);color:var(--white)}
+.btn-primary:hover{background:var(--accent-dark);transform:translateY(-1px)}
+.btn-secondary{background:var(--dark);color:var(--white)}
+.btn-secondary:hover{background:var(--dark2)}
+.btn-outline{background:transparent;border:2px solid var(--accent);color:var(--accent)}
+.btn-outline:hover{background:var(--accent);color:var(--white)}
+.btn-sm{padding:8px 18px;font-size:.8rem}
+
+/* LEVEL HEADER */
+.level-header{background:var(--white);border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow);margin-bottom:20px;border-left:4px solid var(--accent)}
+.level-header .level-tag{font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);font-weight:700;margin-bottom:4px}
+.level-header h2{font-size:1.15rem;color:var(--dark);font-weight:700}
+.level-header p{font-size:.82rem;color:var(--gray);margin-top:4px}
+
+/* MISSION CARD */
+.mission-card{background:var(--white);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:16px}
+.mission-num{display:inline-block;background:var(--accent);color:var(--white);font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:12px;margin-bottom:12px;letter-spacing:1px}
+.mission-card .situation{background:var(--bg);border-left:3px solid var(--accent);padding:14px 16px;border-radius:0 var(--radius) var(--radius) 0;margin-bottom:18px;font-size:.88rem;color:var(--dark)}
+
+/* STACKER + OPTIONS LAYOUT */
+.stacker-layout{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.stacker-panel{flex:1;min-width:260px;display:flex;justify-content:center;align-items:center;background:var(--bg);border-radius:var(--radius);padding:20px;min-height:300px}
+.options-panel{flex:1;min-width:240px;display:flex;flex-direction:column;gap:10px}
+
+/* OPTION BUTTONS */
+.opt-btn{text-align:left;padding:12px 16px;border:2px solid var(--light);border-radius:var(--radius);background:var(--white);cursor:pointer;font-size:.85rem;color:var(--dark);transition:all .2s;font-weight:500;position:relative}
+.opt-btn:hover:not(.disabled){border-color:var(--accent);background:rgba(0,165,171,.04)}
+.opt-btn.correct{border-color:var(--green);background:var(--green-bg);color:#1a7a42}
+.opt-btn.incorrect{border-color:var(--red);background:var(--red-bg);color:#a93226}
+.opt-btn.disabled{cursor:default;opacity:.7}
+.opt-btn .opt-letter{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--bg);align-items:center;justify-content:center;font-weight:700;font-size:.75rem;margin-right:10px;flex-shrink:0;color:var(--mid)}
+.opt-btn.correct .opt-letter{background:var(--green);color:var(--white)}
+.opt-btn.incorrect .opt-letter{background:var(--red);color:var(--white)}
+
+/* FEEDBACK */
+.feedback{padding:14px 18px;border-radius:var(--radius);margin-top:14px;font-size:.84rem;display:none;animation:fadeUp .3s ease}
+.feedback.show{display:block}
+.feedback.ok{background:var(--green-bg);border-left:3px solid var(--green);color:#1a7a42}
+.feedback.wrong{background:var(--red-bg);border-left:3px solid var(--red);color:#a93226}
+.feedback strong{display:block;margin-bottom:4px}
+
+/* DRAG MATCHING (LEVEL 2) */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.match-grid{grid-template-columns:1fr}}
+.match-col-label{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--gray);font-weight:700;margin-bottom:8px}
+.match-item{padding:12px 14px;background:var(--white);border:2px solid var(--light);border-radius:var(--radius);font-size:.82rem;cursor:pointer;transition:all .2s;user-select:none;min-height:46px;display:flex;align-items:center}
+.match-item:hover{border-color:var(--accent)}
+.match-item.selected{border-color:var(--accent);background:rgba(0,165,171,.06);box-shadow:0 0 0 2px rgba(0,165,171,.15)}
+.match-item.matched-ok{border-color:var(--green);background:var(--green-bg);cursor:default}
+.match-item.matched-fail{border-color:var(--red);background:var(--red-bg)}
+.match-item .match-icon{margin-right:8px;font-size:1rem}
+.match-pair-feedback{font-size:.78rem;padding:6px 12px;border-radius:6px;margin-top:4px;display:none}
+.match-pair-feedback.show{display:block}
+
+/* SCORE STRIP */
+.score-strip{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:16px 0;font-size:.78rem}
+.score-strip .chip{background:var(--white);border:1px solid var(--light);padding:6px 14px;border-radius:20px;display:flex;align-items:center;gap:6px}
+.score-strip .chip .val{color:var(--accent);font-weight:700}
+
+/* NEXT BUTTON */
+.nav-row{display:flex;justify-content:flex-end;margin-top:20px;gap:12px}
+
+/* RESULTS */
+.result-card{background:var(--white);border-radius:var(--radius);padding:32px 24px;box-shadow:var(--shadow);text-align:center;margin-bottom:20px}
+.result-card h2{font-size:1.3rem;margin-bottom:4px}
+.result-card .score-big{font-size:3rem;font-weight:800;color:var(--accent);margin:12px 0 4px}
+.result-card .clasif{font-size:1rem;font-weight:600;padding:4px 16px;border-radius:16px;display:inline-block;margin-bottom:16px}
+.clasif-a{background:var(--green-bg);color:#1a7a42}
+.clasif-b{background:rgba(0,165,171,.1);color:var(--accent-dark)}
+.clasif-c{background:var(--yellow-bg);color:#b7791f}
+.clasif-d{background:var(--red-bg);color:#a93226}
+
+.indicators-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0;text-align:left}
+@media(max-width:500px){.indicators-grid{grid-template-columns:1fr}}
+.indicator-box{background:var(--bg);border-radius:var(--radius);padding:14px 16px}
+.indicator-box .ind-label{font-size:.75rem;color:var(--gray);margin-bottom:6px;font-weight:600}
+.indicator-box .ind-bar-bg{height:8px;background:var(--light);border-radius:4px;overflow:hidden;margin-bottom:4px}
+.indicator-box .ind-bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
+.indicator-box .ind-val{font-size:.85rem;font-weight:700}
+
+.retro-msgs{text-align:left;margin:16px 0}
+.retro-msg{padding:10px 14px;border-radius:var(--radius);margin-bottom:8px;font-size:.82rem;background:var(--yellow-bg);border-left:3px solid var(--yellow);color:#7d5a00}
+
+.result-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+
+/* ERROR REVIEW */
+.error-review-card{background:var(--white);border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow);margin-bottom:14px;border-left:4px solid var(--red)}
+.error-review-card .er-q{font-weight:600;font-size:.88rem;margin-bottom:6px}
+.error-review-card .er-your{color:var(--red);font-size:.82rem}
+.error-review-card .er-correct{color:var(--green);font-size:.82rem;margin-top:2px}
+.error-review-card .er-fb{background:var(--bg);padding:10px 12px;border-radius:6px;font-size:.8rem;color:var(--mid);margin-top:8px}
+
+/* FOOTER */
+.tls-footer{text-align:center;padding:20px;font-size:.72rem;color:var(--gray);letter-spacing:.5px}
+
+/* SVG STACKER */
+.stacker-svg{width:100%;max-width:280px;height:auto}
+.stacker-svg .part{cursor:pointer;transition:all .2s}
+.stacker-svg .part:hover{filter:brightness(1.15)}
+.stacker-svg .part.highlight{animation:pulse-part 1s ease infinite}
+@keyframes pulse-part{0%,100%{filter:brightness(1)}50%{filter:brightness(1.3)}}
+.stacker-svg .part.correct-part{filter:brightness(1);opacity:1}
+.stacker-svg .part.wrong-part{filter:none;opacity:.5}
+.stacker-svg .label-tag{font-size:9px;fill:var(--dark);font-weight:600;pointer-events:none}
+
+/* TOOLTIP ON SVG */
+.svg-tooltip{position:absolute;background:var(--dark);color:var(--white);padding:4px 10px;border-radius:6px;font-size:.72rem;pointer-events:none;z-index:10;white-space:nowrap;display:none}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  .stacker-layout{flex-direction:column}
+  .stacker-panel{min-height:220px}
+  .welcome-card{padding:32px 16px}
+  .welcome-card h1{font-size:1.3rem}
+  .container{padding:12px 10px 32px}
+}
+</style>
+</head>
+<body>
+
+<header class="tls-header">
+  <div class="brand">TLS — Tremen Learning System</div>
+  <div class="progress-info" id="headerInfo">
+    <div>Nivel <span id="hLevel">—</span></div>
+    <div>Puntaje <span id="hScore">0</span>/100</div>
+  </div>
+</header>
+<div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+
+<div class="container">
+
+<!-- ===================== WELCOME ===================== -->
+<div class="screen active" id="screenWelcome">
+  <div class="welcome-card">
+    <div class="icon-ring">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="6" width="12" height="22" rx="2" fill="#00a5ab" opacity=".85"/><rect x="10" y="28" width="20" height="6" rx="1" fill="#1a2332"/><rect x="8" y="34" width="10" height="3" rx="1" fill="#3a4a5c"/><rect x="22" y="34" width="10" height="3" rx="1" fill="#3a4a5c"/><rect x="16" y="2" width="8" height="6" rx="1" fill="#00a5ab" opacity=".5"/></svg>
+    </div>
+    <h1>TLS — Conoce tu Apilador</h1>
+    <div class="sub">Reconoce · Relaciona · Decide</div>
+    <p>En este laboratorio no basta con saber cómo se llama cada componente. Tendrás que demostrar que comprendes qué función cumple, qué riesgo puede generar y qué decisión corresponde ante distintas situaciones.</p>
+    <div class="meta">
+      <div>4 niveles</div><div>12 desafíos</div><div>Retroalimentación inmediata</div>
+    </div>
+    <button class="btn btn-primary" onclick="startLab()">COMENZAR MISIÓN ➜</button>
+  </div>
+</div>
+
+<!-- ===================== LEVEL 1 ===================== -->
+<div class="screen" id="screenL1">
+  <div class="level-header">
+    <div class="level-tag">Nivel 1 · Reconoce</div>
+    <h2>Encuentra el componente</h2>
+    <p>Relaciona necesidades operacionales con el componente correspondiente.</p>
+  </div>
+  <div id="l1Content"></div>
+</div>
+
+<!-- ===================== LEVEL 2 ===================== -->
+<div class="screen" id="screenL2">
+  <div class="level-header">
+    <div class="level-tag">Nivel 2 · Relaciona</div>
+    <h2>¿Qué función cumple?</h2>
+    <p>Une cada componente con la función que desempeña en la operación.</p>
+  </div>
+  <div id="l2Content"></div>
+</div>
+
+<!-- ===================== LEVEL 3 ===================== -->
+<div class="screen" id="screenL3">
+  <div class="level-header">
+    <div class="level-tag">Nivel 3 · Detecta el Riesgo</div>
+    <h2>El componente cambia la situación</h2>
+    <p>Identifica qué riesgo genera una condición anormal en un componente.</p>
+  </div>
+  <div id="l3Content"></div>
+</div>
+
+<!-- ===================== LEVEL 4 ===================== -->
+<div class="screen" id="screenL4">
+  <div class="level-header">
+    <div class="level-tag">Nivel 4 · Decide</div>
+    <h2>Ahora tú tomas la decisión</h2>
+    <p>Aplica tu criterio ante situaciones que exigen una decisión operacional.</p>
+  </div>
+  <div id="l4Content"></div>
+</div>
+
+<!-- ===================== RESULTS ===================== -->
+<div class="screen" id="screenResults"></div>
+
+<!-- ===================== ERROR REVIEW ===================== -->
+<div class="screen" id="screenReview"></div>
+
+</div><!-- /container -->
+
+<footer class="tls-footer">Metodología TLS — Tremen Learning System</footer>
+
+<script>
+// ========== STATE ==========
+const state = {
+  currentScreen: 'screenWelcome',
+  score: 0,
+  totalMissions: 12,
+  answers: [], // {level,mission,correct,firstTry,userAnswer,correctAnswer,situation,feedback}
+  l1Mission: 0,
+  l2Matched: 0,
+  l2Selection: null,
+  l3Mission: 0,
+  l4Mission: 0
+};
+
+// ========== DATA ==========
+const L1 = [
+  {
+    situation: 'Necesitas introducir el equipo bajo un pallet para sostener la carga. ¿Qué componente realiza directamente esta función?',
+    options: ['Horquillas','Timón','Batería','Rueda motriz'],
+    correct: 0,
+    fbOk: 'Correcto. Las horquillas ingresan bajo el pallet y sostienen directamente la carga durante la elevación y desplazamiento.',
+    fbWrong: {
+      1:'El timón controla funciones del equipo, pero no sostiene directamente la carga.',
+      2:'La batería entrega energía al equipo, pero no entra en contacto con el pallet.',
+      3:'La rueda motriz participa en el desplazamiento, no en la toma directa de la carga.'
+    },
+    svgHighlight: ['forks']
+  },
+  {
+    situation: 'Necesitas elevar una carga hasta una posición superior. ¿Qué sistema interviene directamente en esta acción?',
+    options: ['Sistema de elevación','Bocina','Rueda de apoyo','Batería'],
+    correct: 0,
+    fbOk: 'Correcto. El sistema de elevación, junto con el mástil y las horquillas, permite elevar y descender la carga.',
+    fbWrong: {
+      1:'La bocina es un dispositivo de advertencia, no interviene en la elevación.',
+      2:'La rueda de apoyo contribuye a la estabilidad, no a elevar carga.',
+      3:'La batería suministra energía, pero no eleva directamente la carga.'
+    },
+    svgHighlight: ['mast']
+  },
+  {
+    situation: 'Necesitas dirigir y controlar el desplazamiento del apilador. ¿Con qué elemento interactúas principalmente?',
+    options: ['Timón','Horquillas','Mástil','Rueda de carga'],
+    correct: 0,
+    fbOk: 'Correcto. El timón concentra controles de desplazamiento, dirección y otras funciones según el modelo.',
+    fbWrong: {
+      1:'Las horquillas sostienen la carga, no dirigen el desplazamiento.',
+      2:'El mástil guía la elevación, no el desplazamiento del equipo.',
+      3:'Las ruedas de carga soportan peso pero no se controlan directamente para dirigir.'
+    },
+    svgHighlight: ['tiller']
+  },
+  {
+    situation: 'El apilador necesita energía para desplazarse y elevar cargas. ¿Qué elemento la almacena?',
+    options: ['Batería','Mástil','Bocina','Rueda motriz'],
+    correct: 0,
+    fbOk: 'Correcto. La batería almacena la energía eléctrica que permite al equipo desplazarse y operar el sistema de elevación.',
+    fbWrong: {
+      1:'El mástil es una estructura mecánica, no almacena energía.',
+      2:'La bocina consume energía, no la almacena.',
+      3:'La rueda motriz transmite movimiento, pero la energía proviene de la batería.'
+    },
+    svgHighlight: ['battery']
+  }
+];
+
+const L2Pairs = [
+  {comp:'Rueda motriz', func:'Participa en el desplazamiento del equipo.', fb:'Correcto. La rueda motriz es accionada por el motor para desplazar el apilador.'},
+  {comp:'Ruedas de carga', func:'Soportan parte del conjunto durante la operación.', fb:'Correcto. Las ruedas de carga distribuyen peso en la zona delantera del equipo.'},
+  {comp:'Parada de emergencia', func:'Permite interrumpir el funcionamiento ante determinadas condiciones.', fb:'Correcto. La parada de emergencia interrumpe funciones del equipo como medida de seguridad.'},
+  {comp:'Indicador de batería', func:'Informa sobre el nivel de energía disponible.', fb:'Correcto. El indicador de batería muestra el estado de carga para anticipar la necesidad de recarga.'}
+];
+
+const L3 = [
+  {
+    situation: 'Durante una inspección visual observas que una horquilla presenta una deformación evidente.',
+    question: '¿Qué riesgo se relaciona principalmente con esta condición?',
+    options: [
+      'Pérdida de capacidad para sostener correctamente la carga.',
+      'Falta de energía de la batería.',
+      'Menor sonido de la bocina.',
+      'Mayor velocidad del equipo.'
+    ],
+    correct: 0,
+    fbOk: 'Correcto. Una horquilla deformada puede comprometer la forma en que la carga es sostenida y manipulada.',
+    fbWrong: {
+      1:'La deformación de la horquilla no afecta la energía de la batería.',
+      2:'La bocina no se ve afectada por la condición de las horquillas.',
+      3:'La velocidad del equipo no depende del estado de las horquillas.'
+    }
+  },
+  {
+    situation: 'El dispositivo de seguridad del timón no responde como corresponde.',
+    question: '¿Qué implica esta condición?',
+    options: [
+      'Es solo una falla de comodidad.',
+      'Puede comprometer una función de seguridad del equipo.',
+      'Afecta únicamente la batería.',
+      'Puede ignorarse si el equipo se mueve lentamente.'
+    ],
+    correct: 1,
+    fbOk: 'Correcto. Los dispositivos de seguridad deben encontrarse operativos según el diseño y procedimiento del equipo.',
+    fbWrong: {
+      0:'Un dispositivo de seguridad no es una cuestión de comodidad; su función es proteger al operador.',
+      2:'El dispositivo de seguridad del timón no está relacionado con la batería.',
+      3:'La velocidad reducida no reemplaza la función de un dispositivo de seguridad.'
+    }
+  }
+];
+
+const L4 = [
+  {
+    situation: 'Debes comenzar una operación. El apilador enciende correctamente, pero observas que la parada de emergencia no responde durante la prueba establecida.',
+    question: '¿Qué haces?',
+    options: [
+      'Operar lentamente.',
+      'Evitar usar la parada de emergencia.',
+      'Informar la condición y no iniciar la operación normal hasta evaluación.',
+      'Utilizarlo solo para cargas livianas.'
+    ],
+    correct: 2,
+    fbOk: 'Correcto. Un dispositivo de seguridad que no responde debe considerarse una condición que requiere evaluación antes de operar.',
+    fbWrong: {
+      0:'Reducir la velocidad no corrige una falla en un sistema de seguridad.',
+      1:'No corresponde reemplazar un sistema de seguridad con precaución personal.',
+      3:'El peso de la carga no elimina la necesidad de contar con sistemas de seguridad operativos.'
+    }
+  },
+  {
+    situation: 'Durante el traslado notas que la rueda motriz responde con tirones y el timón se siente diferente a lo habitual.',
+    question: '¿Qué haces?',
+    options: [
+      'Terminar la maniobra y revisar después.',
+      'Considerar la condición anormal y detener la operación según procedimiento.',
+      'Aumentar la velocidad para comprobar si desaparece.',
+      'Pedir a otro operador que pruebe el equipo.'
+    ],
+    correct: 1,
+    fbOk: 'Correcto. Una condición anormal en componentes críticos como la rueda motriz y el timón requiere detener la operación y seguir el procedimiento establecido.',
+    fbWrong: {
+      0:'Continuar la maniobra con una condición anormal puede agravar el riesgo.',
+      2:'Aumentar la velocidad con una falla detectada incrementa el riesgo de pérdida de control.',
+      3:'Delegar la prueba a otro operador no elimina la condición anormal ni sigue el procedimiento.'
+    }
+  }
+];
+
+// ========== SVG STACKER BUILDER ==========
+function buildStackerSVG(clickable, highlightParts){
+  const hl = highlightParts || [];
+  const clk = clickable || false;
+  // Colors
+  const bodyC = '#2d3e50';
+  const mastC = '#3a4a5c';
+  const forkC = '#8899aa';
+  const wheelC = '#1a2332';
+  const accentC = '#00a5ab';
+  const battC = '#f39c12';
+  const tillerC = '#00a5ab';
+
+  return `<svg class="stacker-svg" viewBox="0 0 320 420" xmlns="http://www.w3.org/2000/svg">
+  <!-- FLOOR LINE -->
+  <line x1="20" y1="380" x2="300" y2="380" stroke="#ccc" stroke-width="1.5" stroke-dasharray="6,4"/>
+
+  <!-- FORKS -->
+  <g class="part ${clk?'':''}${hl.includes('forks')?' highlight':''}" data-part="forks">
+    <rect x="30" y="340" width="130" height="12" rx="3" fill="${forkC}" stroke="#6b7d8e" stroke-width="1"/>
+    <rect x="30" y="358" width="130" height="12" rx="3" fill="${forkC}" stroke="#6b7d8e" stroke-width="1"/>
+    <text class="label-tag" x="50" y="336">Horquillas</text>
+  </g>
+
+  <!-- LOAD WHEELS -->
+  <g class="part ${hl.includes('loadwheels')?' highlight':''}" data-part="loadwheels">
+    <circle cx="50" cy="380" r="14" fill="${wheelC}" stroke="#555" stroke-width="1.5"/>
+    <circle cx="50" cy="380" r="6" fill="#555"/>
+    <circle cx="120" cy="380" r="14" fill="${wheelC}" stroke="#555" stroke-width="1.5"/>
+    <circle cx="120" cy="380" r="6" fill="#555"/>
+    <text class="label-tag" x="60" y="405">Ruedas de carga</text>
+  </g>
+
+  <!-- MAST -->
+  <g class="part ${hl.includes('mast')?' highlight':''}" data-part="mast">
+    <rect x="155" y="60" width="12" height="282" rx="3" fill="${mastC}" stroke="#4a5a6c" stroke-width="1"/>
+    <rect x="171" y="60" width="12" height="282" rx="3" fill="${mastC}" stroke="#4a5a6c" stroke-width="1"/>
+    <!-- Carriage -->
+    <rect x="148" y="280" width="42" height="20" rx="2" fill="${accentC}" opacity=".7"/>
+    <!-- Chains hint -->
+    <line x1="161" y1="70" x2="161" y2="280" stroke="${accentC}" stroke-width="1.5" stroke-dasharray="3,3" opacity=".5"/>
+    <line x1="177" y1="70" x2="177" y2="280" stroke="${accentC}" stroke-width="1.5" stroke-dasharray="3,3" opacity=".5"/>
+    <text class="label-tag" x="145" y="55">Mástil / Sist. elevación</text>
+  </g>
+
+  <!-- BODY -->
+  <g class="part" data-part="body">
+    <rect x="150" y="180" width="80" height="200" rx="6" fill="${bodyC}"/>
+    <rect x="155" y="185" width="70" height="50" rx="4" fill="${mastC}" opacity=".5"/>
+  </g>
+
+  <!-- BATTERY -->
+  <g class="part ${hl.includes('battery')?' highlight':''}" data-part="battery">
+    <rect x="158" y="250" width="62" height="55" rx="4" fill="${battC}" opacity=".8"/>
+    <rect x="170" y="256" width="38" height="10" rx="2" fill="#e6890a"/>
+    <text class="label-tag" x="162" y="320">Batería</text>
+  </g>
+
+  <!-- DRIVE WHEEL -->
+  <g class="part ${hl.includes('drivewheel')?' highlight':''}" data-part="drivewheel">
+    <circle cx="210" cy="380" r="18" fill="${wheelC}" stroke="#555" stroke-width="2"/>
+    <circle cx="210" cy="380" r="8" fill="#555"/>
+    <text class="label-tag" x="188" y="410">Rueda motriz</text>
+  </g>
+
+  <!-- TILLER ARM -->
+  <g class="part ${hl.includes('tiller')?' highlight':''}" data-part="tiller">
+    <line x1="215" y1="360" x2="268" y2="210" stroke="${tillerC}" stroke-width="7" stroke-linecap="round"/>
+    <rect x="256" y="195" width="36" height="30" rx="6" fill="${tillerC}"/>
+    <!-- Controls dots -->
+    <circle cx="268" cy="206" r="4" fill="${bodyC}"/>
+    <circle cx="280" cy="206" r="4" fill="${bodyC}"/>
+    <circle cx="274" cy="218" r="4" fill="${bodyC}"/>
+    <text class="label-tag" x="258" y="190">Timón / Mandos</text>
+  </g>
+
+  <!-- SUPPORT WHEELS (small rear) -->
+  <g class="part" data-part="supportwheels">
+    <circle cx="240" cy="380" r="9" fill="${wheelC}" stroke="#555" stroke-width="1"/>
+    <circle cx="240" cy="380" r="4" fill="#555"/>
+  </g>
+
+  </svg>`;
+}
+
+// ========== UTILITY ==========
+function $(id){return document.getElementById(id)}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+  state.currentScreen=id;
+  window.scrollTo({top:0,behavior:'smooth'});
+  updateHeader();
+}
+function updateHeader(){
+  let lvl='—';
+  if(state.currentScreen==='screenL1') lvl='1';
+  else if(state.currentScreen==='screenL2') lvl='2';
+  else if(state.currentScreen==='screenL3') lvl='3';
+  else if(state.currentScreen==='screenL4') lvl='4';
+  $('hLevel').textContent=lvl;
+  $('hScore').textContent=state.score;
+  const done=state.answers.length;
+  const pct=Math.round((done/state.totalMissions)*100);
+  $('progressBar').style.width=pct+'%';
+}
+function scoreStrip(){
+  const done=state.answers.length;
+  const correct=state.answers.filter(a=>a.correct).length;
+  return `<div class="score-strip">
+    <div class="chip">Puntaje <span class="val">${state.score}/100</span></div>
+    <div class="chip">Correctas <span class="val">${correct}</span></div>
+    <div class="chip">Avance <span class="val">${done}/${state.totalMissions}</span></div>
+  </div>`;
+}
+
+// ========== START ==========
+function startLab(){
+  state.l1Mission=0;
+  renderL1Mission();
+  showScreen('screenL1');
+}
+
+// ========== LEVEL 1 ==========
+function renderL1Mission(){
+  const m=L1[state.l1Mission];
+  const missionNum=state.l1Mission+1;
+  const letters=['A','B','C','D'];
+  let optsHTML='';
+  m.options.forEach((o,i)=>{
+    optsHTML+=`<button class="opt-btn" onclick="answerL1(${i})" id="l1opt${i}">
+      <span class="opt-letter">${letters[i]}</span>${o}
+    </button>`;
+  });
+  $('l1Content').innerHTML=`
+    ${scoreStrip()}
+    <div class="mission-card">
+      <div class="mission-num">MISIÓN ${missionNum} DE 4</div>
+      <div class="situation">${m.situation}</div>
+      <div class="stacker-layout">
+        <div class="stacker-panel">${buildStackerSVG(true,m.svgHighlight)}</div>
+        <div class="options-panel" id="l1opts">${optsHTML}</div>
+      </div>
+      <div class="feedback" id="l1fb"></div>
+      <div class="nav-row" id="l1nav" style="display:none">
+        <button class="btn btn-primary btn-sm" onclick="nextL1()">CONTINUAR ➜</button>
+      </div>
+    </div>`;
+  updateHeader();
+}
+function answerL1(idx){
+  const m=L1[state.l1Mission];
+  const btns=document.querySelectorAll('#l1opts .opt-btn');
+  if(btns[0].classList.contains('disabled')) return;
+  const isCorrect=idx===m.correct;
+  const alreadyAnswered=state.answers.find(a=>a.level===1&&a.mission===state.l1Mission);
+  btns.forEach((b,i)=>{
+    b.classList.add('disabled');
+    if(i===m.correct) b.classList.add('correct');
+    if(i===idx&&!isCorrect) b.classList.add('incorrect');
+  });
+  const fb=$('l1fb');
+  if(isCorrect){
+    fb.className='feedback show ok';
+    fb.innerHTML=`<strong>✓ Correcto</strong>${m.fbOk}`;
+    if(!alreadyAnswered){
+      const pts=state.l1Mission===0?7:6;
+      state.score+=pts;
+      state.answers.push({level:1,mission:state.l1Mission,correct:true,firstTry:true,
+        userAnswer:m.options[idx],correctAnswer:m.options[m.correct],
+        situation:m.situation,feedback:m.fbOk});
+    }
+  } else {
+    fb.className='feedback show wrong';
+    fb.innerHTML=`<strong>✗ Incorrecto</strong>${m.fbWrong[idx]||'Revisa la relación entre la necesidad operacional y el componente.'}`;
+    if(!alreadyAnswered){
+      state.answers.push({level:1,mission:state.l1Mission,correct:false,firstTry:false,
+        userAnswer:m.options[idx],correctAnswer:m.options[m.correct],
+        situation:m.situation,feedback:m.fbWrong[idx]||''});
+    }
+    // allow retry
+    setTimeout(()=>{
+      btns.forEach(b=>{b.classList.remove('disabled','correct','incorrect')});
+      fb.classList.remove('show');
+    },2200);
+    return;
+  }
+  $('l1nav').style.display='flex';
+  updateHeader();
+}
+function nextL1(){
+  state.l1Mission++;
+  if(state.l1Mission>=L1.length){
+    renderL2();
+    showScreen('screenL2');
+  } else {
+    renderL1Mission();
+  }
+}
+
+// ========== LEVEL 2 — MATCHING ==========
+function renderL2(){
+  // Shuffle functions
+  const funcOrder=[...Array(4).keys()];
+  for(let i=funcOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[funcOrder[i],funcOrder[j]]=[funcOrder[j],funcOrder[i]];}
+  
+  let compHTML='';
+  L2Pairs.forEach((p,i)=>{
+    compHTML+=`<div class="match-item" data-type="comp" data-idx="${i}" onclick="selectMatch(this)" id="mc${i}">
+      <span class="match-icon">🔧</span>${p.comp}
+    </div>`;
+  });
+  let funcHTML='';
+  funcOrder.forEach(i=>{
+    funcHTML+=`<div class="match-item" data-type="func" data-idx="${i}" onclick="selectMatch(this)" id="mf${i}">
+      <span class="match-icon">⚙️</span>${L2Pairs[i].func}
+    </div>`;
+  });
+
+  $('l2Content').innerHTML=`
+    ${scoreStrip()}
+    <div class="mission-card">
+      <div class="mission-num">4 PARES POR UNIR</div>
+      <div class="situation">Selecciona un componente a la izquierda y luego la función que le corresponde a la derecha.</div>
+      <div class="match-grid">
+        <div>
+          <div class="match-col-label">Componentes</div>
+          ${compHTML}
+        </div>
+        <div>
+          <div class="match-col-label">Funciones</div>
+          ${funcHTML}
+        </div>
+      </div>
+      <div class="feedback" id="l2fb"></div>
+      <div class="nav-row" id="l2nav" style="display:none">
+        <button class="btn btn-primary btn-sm" onclick="goToL3()">CONTINUAR AL NIVEL 3 ➜</button>
+      </div>
+    </div>`;
+  state.l2Matched=0;
+  state.l2Selection=null;
+  updateHeader();
+}
+function selectMatch(el){
+  if(el.classList.contains('matched-ok')) return;
+  const type=el.dataset.type;
+  const idx=parseInt(el.dataset.idx);
+  
+  if(!state.l2Selection){
+    document.querySelectorAll('.match-item.selected').forEach(e=>e.classList.remove('selected'));
+    el.classList.add('selected');
+    state.l2Selection={type,idx,el};
+  } else {
+    if(state.l2Selection.type===type){
+      state.l2Selection.el.classList.remove('selected');
+      el.classList.add('selected');
+      state.l2Selection={type,idx,el};
+      return;
+    }
+    // Check match
+    const compIdx=type==='comp'?idx:state.l2Selection.idx;
+    const funcIdx=type==='func'?idx:state.l2Selection.idx;
+    const compEl=type==='comp'?el:state.l2Selection.el;
+    const funcEl=type==='func'?el:state.l2Selection.el;
+    
+    const isCorrect=compIdx===funcIdx;
+    const alreadyAnswered=state.answers.find(a=>a.level===2&&a.mission===compIdx);
+    
+    if(isCorrect){
+      compEl.classList.remove('selected');
+      funcEl.classList.remove('selected');
+      compEl.classList.add('matched-ok');
+      funcEl.classList.add('matched-ok');
+      const fb=$('l2fb');
+      fb.className='feedback show ok';
+      fb.innerHTML=`<strong>✓ Correcto</strong>${L2Pairs[compIdx].fb}`;
+      if(!alreadyAnswered){
+        const pts=compIdx===0?7:6;
+        state.score+=pts;
+        state.answers.push({level:2,mission:compIdx,correct:true,firstTry:true,
+          userAnswer:L2Pairs[compIdx].comp+' → '+L2Pairs[compIdx].func,
+          correctAnswer:L2Pairs[compIdx].comp+' → '+L2Pairs[compIdx].func,
+          situation:'Unir: '+L2Pairs[compIdx].comp,feedback:L2Pairs[compIdx].fb});
+      }
+      state.l2Matched++;
+      if(state.l2Matched>=4){
+        setTimeout(()=>{$('l2nav').style.display='flex'},800);
+      }
+    } else {
+      compEl.classList.add('matched-fail');
+      funcEl.classList.add('matched-fail');
+      if(!alreadyAnswered){
+        state.answers.push({level:2,mission:compIdx,correct:false,firstTry:false,
+          userAnswer:L2Pairs[compIdx].comp+' → '+L2Pairs[funcIdx].func,
+          correctAnswer:L2Pairs[compIdx].comp+' → '+L2Pairs[compIdx].func,
+          situation:'Unir: '+L2Pairs[compIdx].comp,feedback:'La función seleccionada no corresponde a este componente.'});
+      }
+      const fb=$('l2fb');
+      fb.className='feedback show wrong';
+      fb.innerHTML=`<strong>✗ Par incorrecto</strong>Esa función no corresponde a este componente. Intenta nuevamente.`;
+      setTimeout(()=>{
+        compEl.classList.remove('matched-fail','selected');
+        funcEl.classList.remove('matched-fail','selected');
+        fb.classList.remove('show');
+      },1500);
+    }
+    state.l2Selection=null;
+    updateHeader();
+  }
+}
+function goToL3(){
+  state.l3Mission=0;
+  renderL3Mission();
+  showScreen('screenL3');
+}
+
+// ========== LEVEL 3 ==========
+function renderL3Mission(){
+  const m=L3[state.l3Mission];
+  const missionNum=state.l3Mission+1;
+  const letters=['A','B','C','D'];
+  let optsHTML='';
+  m.options.forEach((o,i)=>{
+    optsHTML+=`<button class="opt-btn" onclick="answerL3(${i})" id="l3opt${i}">
+      <span class="opt-letter">${letters[i]}</span>${o}
+    </button>`;
+  });
+  $('l3Content').innerHTML=`
+    ${scoreStrip()}
+    <div class="mission-card">
+      <div class="mission-num">SITUACIÓN ${missionNum} DE 2</div>
+      <div class="situation">${m.situation}</div>
+      <p style="font-weight:600;margin:12px 0 14px;font-size:.9rem">${m.question}</p>
+      <div class="options-panel" id="l3opts" style="max-width:600px">${optsHTML}</div>
+      <div class="feedback" id="l3fb"></div>
+      <div class="nav-row" id="l3nav" style="display:none">
+        <button class="btn btn-primary btn-sm" onclick="nextL3()">CONTINUAR ➜</button>
+      </div>
+    </div>`;
+  updateHeader();
+}
+function answerL3(idx){
+  const m=L3[state.l3Mission];
+  const btns=document.querySelectorAll('#l3opts .opt-btn');
+  if(btns[0].classList.contains('disabled')) return;
+  const isCorrect=idx===m.correct;
+  const alreadyAnswered=state.answers.find(a=>a.level===3&&a.mission===state.l3Mission);
+  btns.forEach((b,i)=>{
+    b.classList.add('disabled');
+    if(i===m.correct) b.classList.add('correct');
+    if(i===idx&&!isCorrect) b.classList.add('incorrect');
+  });
+  const fb=$('l3fb');
+  if(isCorrect){
+    fb.className='feedback show ok';
+    fb.innerHTML=`<strong>✓ Correcto</strong>${m.fbOk}`;
+    if(!alreadyAnswered){
+      const pts=state.l3Mission===0?13:12;
+      state.score+=pts;
+      state.answers.push({level:3,mission:state.l3Mission,correct:true,firstTry:true,
+        userAnswer:m.options[idx],correctAnswer:m.options[m.correct],
+        situation:m.situation+' '+m.question,feedback:m.fbOk});
+    }
+  } else {
+    fb.className='feedback show wrong';
+    fb.innerHTML=`<strong>✗ Incorrecto</strong>${m.fbWrong[idx]||'Revisa la relación entre la condición del componente y el riesgo.'}`;
+    if(!alreadyAnswered){
+      state.answers.push({level:3,mission:state.l3Mission,correct:false,firstTry:false,
+        userAnswer:m.options[idx],correctAnswer:m.options[m.correct],
+        situation:m.situation+' '+m.question,feedback:m.fbWrong[idx]||''});
+    }
+    setTimeout(()=>{
+      btns.forEach(b=>{b.classList.remove('disabled','correct','incorrect')});
+      fb.classList.remove('show');
+    },2200);
+    return;
+  }
+  $('l3nav').style.display='flex';
+  updateHeader();
+}
+function nextL3(){
+  state.l3Mission++;
+  if(state.l3Mission>=L3.length){
+    state.l4Mission=0;
+    renderL4Mission();
+    showScreen('screenL4');
+  } else {
+    renderL3Mission();
+  }
+}
+
+// ========== LEVEL 4 ==========
+function renderL4Mission(){
+  const m=L4[state.l4Mission];
+  const missionNum=state.l4Mission+1;
+  const letters=['A','B','C','D'];
+  let optsHTML='';
+  m.options.forEach((o,i)=>{
+    optsHTML+=`<button class="opt-btn" onclick="answerL4(${i})" id="l4opt${i}">
+      <span class="opt-letter">${letters[i]}</span>${o}
+    </button>`;
+  });
+  $('l4Content').innerHTML=`
+    ${scoreStrip()}
+    <div class="mission-card">
+      <div class="mission-num">CASO ${missionNum} DE 2</div>
+      <div class="situation">${m.situation}</div>
+      <p style="font-weight:600;margin:12px 0 14px;font-size:.9rem">${m.question}</p>
+      <div class="options-panel" id="l4opts" style="max-width:600px">${optsHTML}</div>
+      <div class="feedback" id="l4fb"></div>
+      <div class="nav-row" id="l4nav" style="display:none">
+        <button class="btn btn-primary btn-sm" onclick="nextL4()">CONTINUAR ➜</button>
+      </div>
+    </div>`;
+  updateHeader();
+}
+function answerL4(idx){
+  const m=L4[state.l4Mission];
+  const btns=document.querySelectorAll('#l4opts .opt-btn');
+  if(btns[0].classList.contains('disabled')) return;
+  const isCorrect=idx===m.correct;
+  const alreadyAnswered=state.answers.find(a=>a.level===4&&a.mission===state.l4Mission);
+  btns.forEach((b,i)=>{
+    b.classList.add('disabled');
+    if(i===m.correct) b.classList.add('correct');
+    if(i===idx&&!isCorrect) b.classList.add('incorrect');
+  });
+  const fb=$('l4fb');
+  if(isCorrect){
+    fb.className='feedback show ok';
+    fb.innerHTML=`<strong>✓ Correcto</strong>${m.fbOk}`;
+    if(!alreadyAnswered){
+      const pts=state.l4Mission===0?13:12;
+      state.score+=pts;
+      state.answers.push({level:4,mission:state.l4Mission,correct:true,firstTry:true,
+        userAnswer:m.options[idx],correctAnswer:m.options[m.correct],
+        situation:m.situation+' '+m.question,feedback:m.fbOk});
+    }
+  } else {
+    fb.className='feedback show wrong';
+    fb.innerHTML=`<strong>✗ Incorrecto</strong>${m.fbWrong[idx]||'Revisa tu criterio de decisión.'}`;
+    if(!alreadyAnswered){
+      state.answers.push({level:4,mission:state.l4Mission,correct:false,firstTry:false,
+        userAnswer:m.options[idx],correctAnswer:m.options[m.correct],
+        situation:m.situation+' '+m.question,feedback:m.fbWrong[idx]||''});
+    }
+    setTimeout(()=>{
+      btns.forEach(b=>{b.classList.remove('disabled','correct','incorrect')});
+      fb.classList.remove('show');
+    },2200);
+    return;
+  }
+  $('l4nav').style.display='flex';
+  updateHeader();
+}
+function nextL4(){
+  state.l4Mission++;
+  if(state.l4Mission>=L4.length){
+    renderResults();
+    showScreen('screenResults');
+  } else {
+    renderL4Mission();
+  }
+}
+
+// ========== RESULTS ==========
+function renderResults(){
+  const score=state.score;
+  let clasif='',clasifClass='';
+  if(score>=90){clasif='Dominio sólido';clasifClass='clasif-a';}
+  else if(score>=75){clasif='Buen nivel';clasifClass='clasif-b';}
+  else if(score>=60){clasif='En desarrollo';clasifClass='clasif-c';}
+  else{clasif='Necesita reforzamiento';clasifClass='clasif-d';}
+
+  // Per-level stats
+  const l1c=state.answers.filter(a=>a.level===1&&a.firstTry).length;
+  const l2c=state.answers.filter(a=>a.level===2&&a.firstTry).length;
+  const l3c=state.answers.filter(a=>a.level===3&&a.firstTry).length;
+  const l4c=state.answers.filter(a=>a.level===4&&a.firstTry).length;
+  const pct1=Math.round((l1c/4)*100);
+  const pct2=Math.round((l2c/4)*100);
+  const pct3=Math.round((l3c/2)*100);
+  const pct4=Math.round((l4c/2)*100);
+
+  function barColor(p){return p>=75?'var(--green)':p>=50?'var(--yellow)':'var(--red)';}
+
+  // Retro messages
+  let retros=[];
+  if(pct1<75) retros.push('Refuerza la identificación de los principales componentes del apilador y la función que cumple cada uno.');
+  if(pct2<75) retros.push('Repasa cómo se relacionan timón, sistema de elevación, ruedas y batería con la operación.');
+  if(pct3<75) retros.push('Necesitas reforzar cómo una condición anormal en un componente puede afectar la seguridad.');
+  if(pct4<75) retros.push('Recuerda: reconocer una falla no basta. También debes saber cuándo detener e informar.');
+
+  const errors=state.answers.filter(a=>!a.firstTry);
+
+  $('screenResults').innerHTML=`
+    <div class="result-card">
+      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);font-weight:700;margin-bottom:4px">Resultado TLS</div>
+      <h2>Conoce tu Apilador</h2>
+      <div class="score-big">${score}<span style="font-size:1.2rem;color:var(--gray)">/100</span></div>
+      <div class="clasif ${clasifClass}">${clasif}</div>
+      <div class="indicators-grid">
+        <div class="indicator-box">
+          <div class="ind-label">Reconocimiento de componentes</div>
+          <div class="ind-bar-bg"><div class="ind-bar-fill" style="width:${pct1}%;background:${barColor(pct1)}"></div></div>
+          <div class="ind-val" style="color:${barColor(pct1)}">${pct1}%</div>
+        </div>
+        <div class="indicator-box">
+          <div class="ind-label">Relación componente–función</div>
+          <div class="ind-bar-bg"><div class="ind-bar-fill" style="width:${pct2}%;background:${barColor(pct2)}"></div></div>
+          <div class="ind-val" style="color:${barColor(pct2)}">${pct2}%</div>
+        </div>
+        <div class="indicator-box">
+          <div class="ind-label">Identificación de riesgos</div>
+          <div class="ind-bar-bg"><div class="ind-bar-fill" style="width:${pct3}%;background:${barColor(pct3)}"></div></div>
+          <div class="ind-val" style="color:${barColor(pct3)}">${pct3}%</div>
+        </div>
+        <div class="indicator-box">
+          <div class="ind-label">Toma de decisiones</div>
+          <div class="ind-bar-bg"><div class="ind-bar-fill" style="width:${pct4}%;background:${barColor(pct4)}"></div></div>
+          <div class="ind-val" style="color:${barColor(pct4)}">${pct4}%</div>
+        </div>
+      </div>
+      ${retros.length?`<div class="retro-msgs">${retros.map(r=>`<div class="retro-msg">${r}</div>`).join('')}</div>`:''}
+      <div class="result-actions">
+        ${errors.length?`<button class="btn btn-outline btn-sm" onclick="showReview()">REVISAR MIS ERRORES</button>`:''}
+        <button class="btn btn-secondary btn-sm" onclick="resetLab()">REPETIR LABORATORIO</button>
+        <button class="btn btn-primary btn-sm" onclick="showScreen('screenResults')">VER RESULTADO</button>
+      </div>
+    </div>`;
+  $('progressBar').style.width='100%';
+}
+
+// ========== ERROR REVIEW ==========
+function showReview(){
+  const errors=state.answers.filter(a=>!a.firstTry);
+  if(!errors.length){
+    showScreen('screenResults');
+    return;
+  }
+  let html=`<div class="level-header" style="border-left-color:var(--red)">
+    <div class="level-tag" style="color:var(--red)">Revisión de errores</div>
+    <h2>Desafíos donde necesitaste reintento</h2>
+  </div>`;
+  errors.forEach((e,i)=>{
+    const lvlNames={1:'Nivel 1 — Reconoce',2:'Nivel 2 — Relaciona',3:'Nivel 3 — Detecta el Riesgo',4:'Nivel 4 — Decide'};
+    html+=`<div class="error-review-card">
+      <div style="font-size:.7rem;color:var(--gray);margin-bottom:6px">${lvlNames[e.level]}</div>
+      <div class="er-q">${e.situation}</div>
+      <div class="er-your">✗ Tu respuesta inicial: ${e.userAnswer}</div>
+      <div class="er-correct">✓ Respuesta correcta: ${e.correctAnswer}</div>
+      <div class="er-fb">${e.feedback}</div>
+    </div>`;
+  });
+  html+=`<div class="nav-row">
+    <button class="btn btn-outline btn-sm" onclick="showScreen('screenResults')">← VOLVER AL RESULTADO</button>
+    <button class="btn btn-secondary btn-sm" onclick="resetLab()">REPETIR LABORATORIO</button>
+  </div>`;
+  $('screenReview').innerHTML=html;
+  showScreen('screenReview');
+}
+
+// ========== RESET ==========
+function resetLab(){
+  state.score=0;
+  state.answers=[];
+  state.l1Mission=0;
+  state.l2Matched=0;
+  state.l2Selection=null;
+  state.l3Mission=0;
+  state.l4Mission=0;
+  $('progressBar').style.width='0';
+  showScreen('screenWelcome');
+}
+</script>
+</body>
+</html>
