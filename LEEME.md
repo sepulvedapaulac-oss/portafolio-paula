@@ -11,9 +11,6 @@ Sitio estático (sin servidor ni base de datos) con los proyectos y una muestra 
 Los proyectos que ya estaban en el portafolio apuntan a carpetas que no están en ningún repositorio. Si las tienes, cópialas así y aparecerán solas:
 
 ```
-scorm/liderazgo-efectivo/index.html
-scorm/ley-manejo-datos/index.html
-videos/autoliderazgo.mp4
 videos/grua-horquilla.mp4
 ```
 Mientras falten, el botón muestra «Esta muestra se comparte a pedido» en vez de un error.
